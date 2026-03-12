@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import type { CharacterFilters, CharacterRecord, ImportFileResult, TagAliasRule } from '../../shared/types/character';
+import type { AppSettings, CharacterFilters, CharacterRecord, ImportFileResult, TagAliasRule } from '../../shared/types/character';
 import {
   applyTagsToCharacters,
   deleteCharacters,
   exportLibrarySnapshot,
+  getAppSettings,
   getAsset,
   getCharacter,
   importLibrarySnapshot,
@@ -13,16 +14,20 @@ import {
   listCollections,
   moveCharactersToCollection,
   renameLorebookForCharacters,
+  saveAppSettings,
   saveAliasRule,
   saveCharacter,
   saveCollection
 } from '../../db/repositories/characterRepository';
 import { createId } from '../../shared/lib/id';
 import { nowIso } from '../../shared/lib/date';
+import { createDefaultAppSettings, mergeAppSettings } from '../../shared/lib/appSettings';
+import { detectLocale } from '../../shared/i18n/messages';
 
 interface AppState {
   characters: CharacterRecord[];
   filters: CharacterFilters;
+  settings: AppSettings;
   selectedCharacterId?: string;
   selectedIds: string[];
   aliasRules: TagAliasRule[];
@@ -30,7 +35,10 @@ interface AppState {
   importResults: ImportFileResult[];
   isLoading: boolean;
   loadInitialData: () => Promise<void>;
+  loadSettings: () => Promise<void>;
   setFilters: (patch: Partial<CharacterFilters>) => void;
+  updateLocale: (mode: 'auto' | 'manual', locale?: string) => Promise<void>;
+  updateThemeMode: (themeMode: AppSettings['themeMode']) => Promise<void>;
   selectCharacter: (id?: string) => void;
   toggleCharacterSelection: (id: string) => void;
   clearSelection: () => void;
@@ -68,6 +76,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     collectionId: '',
     sortBy: 'updatedAt'
   },
+  settings: createDefaultAppSettings(detectLocale()),
   selectedIds: [],
   aliasRules: [],
   collections: [],
@@ -84,8 +93,39 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ characters, aliasRules, collections, isLoading: false });
   },
 
+  async loadSettings() {
+    const preferredLocale = detectLocale();
+    const storedSettings = await getAppSettings();
+    const settings = mergeAppSettings(storedSettings, preferredLocale);
+    set({ settings });
+
+    if (!storedSettings) {
+      await saveAppSettings(settings);
+    }
+  },
+
   setFilters(patch) {
     set({ filters: { ...get().filters, ...patch } });
+  },
+
+  async updateLocale(mode, locale) {
+    const current = get().settings;
+    const nextSettings = {
+      ...current,
+      localeMode: mode,
+      locale: mode === 'manual' ? locale ?? current.locale ?? detectLocale() : current.locale ?? detectLocale()
+    };
+    await saveAppSettings(nextSettings);
+    set({ settings: nextSettings });
+  },
+
+  async updateThemeMode(themeMode) {
+    const nextSettings = {
+      ...get().settings,
+      themeMode
+    };
+    await saveAppSettings(nextSettings);
+    set({ settings: nextSettings });
   },
 
   selectCharacter(id) {

@@ -1,6 +1,13 @@
 import { db } from '../dexie';
 import { nowIso } from '../../shared/lib/date';
-import type { AssetRecord, CharacterRecord, CollectionRecord, ImportFileResult, TagAliasRule } from '../../shared/types/character';
+import type {
+  AppSettings,
+  AssetRecord,
+  CharacterRecord,
+  CollectionRecord,
+  ImportFileResult,
+  TagAliasRule
+} from '../../shared/types/character';
 import { buildTextIndex, normalizeTags } from '../../core/normalization/normalizeTags';
 import { validateCharacter } from '../../core/validation/validateCharacter';
 import { parseCharacterJson, parseCharacterPng } from '../../core/card-parser/cardParser';
@@ -67,7 +74,8 @@ export async function importFiles(files: FileList | File[], aliasRules: TagAlias
             result: {
               fileName: file.name,
               status: 'error' as const,
-              message: 'Unsupported file type.'
+              message: 'Unsupported file type.',
+              messageKey: 'import.result.unsupportedType'
             }
           };
 
@@ -150,6 +158,17 @@ export async function listAliasRules(): Promise<TagAliasRule[]> {
 
 export async function saveAliasRule(rule: TagAliasRule): Promise<void> {
   await db.tagAliasRules.put(rule);
+}
+
+export async function getAppSettings(): Promise<AppSettings | undefined> {
+  return db.settings.get('app');
+}
+
+export async function saveAppSettings(settings: AppSettings): Promise<void> {
+  await db.settings.put({
+    ...settings,
+    id: 'app'
+  });
 }
 
 export async function applyTagsToCharacters(

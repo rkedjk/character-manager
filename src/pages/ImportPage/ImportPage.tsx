@@ -6,9 +6,11 @@ import { useAppStore } from '../../app/store/appStore';
 import { downloadBlob, downloadText } from '../../shared/lib/download';
 import { serializeCharacterToJson, serializeCharacterToPng } from '../../core/card-serializer/cardSerializer';
 import { createFallbackPngBlob } from '../../shared/lib/fallbackPng';
+import { useI18n } from '../../shared/i18n/I18nProvider';
 
 export function ImportPage() {
   const { characters, selectedIds, importResults, loadInitialData, importCharacterFiles, loadAssetBlob } = useAppStore();
+  const { t } = useI18n();
   const [isExporting, setIsExporting] = useState(false);
   const exportableCharacters = useMemo(
     () => characters.filter((character) => selectedIds.includes(character.id)),
@@ -36,7 +38,7 @@ export function ImportPage() {
   return (
     <AppShell>
       <div className="page-grid">
-        <SectionCard title="Import files" subtitle="Drop or pick JSON and PNG character cards from your device.">
+        <SectionCard title={t('import.title')} subtitle={t('import.subtitle')}>
           <label className="dropzone">
             <input
               type="file"
@@ -48,30 +50,30 @@ export function ImportPage() {
                 }
               }}
             />
-            <span>Tap to select files or drop them here</span>
+            <span>{t('import.dropzone')}</span>
           </label>
           {!importResults.length ? (
-            <EmptyState title="No import results yet" description="After import, every file gets a success, warning or error report." />
+            <EmptyState title={t('import.empty.title')} description={t('import.empty.description')} />
           ) : (
             <ul className="result-list">
               {importResults.map((result) => (
                 <li key={`${result.fileName}-${result.status}`} className={`result-item result-item--${result.status}`}>
                   <strong>{result.fileName}</strong>
-                  <span>{result.message}</span>
+                  <span>{result.messageKey ? t(result.messageKey as never, result.messageValues) : result.message}</span>
                 </li>
               ))}
             </ul>
           )}
         </SectionCard>
 
-        <SectionCard title="Batch export" subtitle="Exports JSON and PNG for the currently selected cards from the library.">
+        <SectionCard title={t('import.batch.title')} subtitle={t('import.batch.subtitle')}>
           {!exportableCharacters.length ? (
-            <EmptyState title="No selected cards" description="Go to Library and select one or more cards for batch export." />
+            <EmptyState title={t('import.batch.empty.title')} description={t('import.batch.empty.description')} />
           ) : (
             <div className="stack">
-              <p className="muted">{exportableCharacters.length} cards are ready for export.</p>
+              <p className="muted">{t('import.batch.ready', { count: exportableCharacters.length })}</p>
               <button className="button button--primary" onClick={() => void handleExportAll()} disabled={isExporting}>
-                {isExporting ? 'Exporting…' : 'Export selected as JSON + PNG'}
+                {isExporting ? t('import.batch.exporting') : t('import.batch.exportAction')}
               </button>
             </div>
           )}

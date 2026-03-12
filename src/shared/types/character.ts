@@ -47,6 +47,8 @@ export interface ValidationIssue {
   level: 'warning' | 'error';
   path: string;
   message: string;
+  messageKey?: string;
+  messageValues?: Record<string, string | number>;
 }
 
 export interface ValidationSummary {
@@ -109,6 +111,9 @@ export interface AppSettings {
   collapseMultipleSpaces: boolean;
   lowercaseTags: boolean;
   trimTags: boolean;
+  localeMode: 'auto' | 'manual';
+  locale?: string;
+  themeMode: 'system' | 'light' | 'dark';
 }
 
 export interface CharacterFormState {
@@ -130,6 +135,8 @@ export interface ImportFileResult {
   fileName: string;
   status: 'success' | 'warning' | 'error';
   message: string;
+  messageKey?: string;
+  messageValues?: Record<string, string | number>;
   characterId?: string;
 }
 

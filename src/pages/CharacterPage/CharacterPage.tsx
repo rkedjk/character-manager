@@ -11,15 +11,9 @@ import { serializeCharacterToJson, serializeCharacterToPng } from '../../core/ca
 import { downloadBlob, downloadText } from '../../shared/lib/download';
 import { createFallbackPngBlob } from '../../shared/lib/fallbackPng';
 import { createId } from '../../shared/lib/id';
+import { useI18n } from '../../shared/i18n/I18nProvider';
 
 type TabId = 'core' | 'tags' | 'lorebook' | 'raw';
-
-const tabs: Array<{ id: TabId; label: string }> = [
-  { id: 'core', label: 'Core' },
-  { id: 'tags', label: 'Tags' },
-  { id: 'lorebook', label: 'Lorebook' },
-  { id: 'raw', label: 'Raw' }
-];
 
 function cloneRecord(record: CharacterRecord): CharacterRecord {
   return structuredClone(record);
@@ -28,6 +22,7 @@ function cloneRecord(record: CharacterRecord): CharacterRecord {
 export function CharacterPage() {
   const { id } = useParams();
   const { aliasRules, loadCharacter, saveCharacterRecord, loadAssetBlob } = useAppStore();
+  const { t } = useI18n();
   const [record, setRecord] = useState<CharacterRecord | null>(null);
   const [history, setHistory] = useState<CharacterRecord[]>([]);
   const [future, setFuture] = useState<CharacterRecord[]>([]);
@@ -68,6 +63,23 @@ export function CharacterPage() {
     () => (record ? normalizeTags(record.card.data.tags, aliasRules).tags : []),
     [record, aliasRules]
   );
+  const tabs: Array<{ id: TabId; label: string }> = [
+    { id: 'core', label: t('character.tab.core') },
+    { id: 'tags', label: t('character.tab.tags') },
+    { id: 'lorebook', label: t('character.tab.lorebook') },
+    { id: 'raw', label: t('character.tab.raw') }
+  ];
+  const coreFields: Array<[string, keyof CharacterRecord['card']['data']]> = [
+    [t('character.field.name'), 'name'],
+    [t('character.field.description'), 'description'],
+    [t('character.field.personality'), 'personality'],
+    [t('character.field.scenario'), 'scenario'],
+    [t('character.field.firstMessage'), 'first_mes'],
+    [t('character.field.exampleMessages'), 'mes_example'],
+    [t('character.field.creatorNotes'), 'creator_notes'],
+    [t('character.field.systemPrompt'), 'system_prompt'],
+    [t('character.field.postHistoryInstructions'), 'post_history_instructions']
+  ];
 
   function updateRecord(mutator: (draft: CharacterRecord) => void): void {
     if (!record) {
@@ -132,7 +144,7 @@ export function CharacterPage() {
   if (!record) {
     return (
       <AppShell>
-        <EmptyState title="Character not found" description="Return to the library and open an imported character card." />
+        <EmptyState title={t('character.notFound.title')} description={t('character.notFound.description')} />
       </AppShell>
     );
   }
@@ -142,20 +154,20 @@ export function CharacterPage() {
       <div className="page-grid">
         <SectionCard
           title={record.card.data.name}
-          subtitle={isDirty ? 'Autosave pending…' : 'Saved locally.'}
+          subtitle={isDirty ? t('character.status.pending') : t('character.status.saved')}
           actions={
             <div className="toolbar toolbar--compact">
               <button className="button button--ghost" onClick={undo} disabled={history.length < 2}>
-                Undo
+                {t('character.undo')}
               </button>
               <button className="button button--ghost" onClick={redo} disabled={!future.length}>
-                Redo
+                {t('character.redo')}
               </button>
               <button className="button" onClick={() => void exportJson()}>
-                Export JSON
+                {t('character.exportJson')}
               </button>
               <button className="button button--primary" onClick={() => void exportPng()}>
-                Export PNG
+                {t('character.exportPng')}
               </button>
             </div>
           }
@@ -174,17 +186,7 @@ export function CharacterPage() {
 
           {activeTab === 'core' ? (
             <div className="form-grid">
-              {[
-                ['Name', 'name'],
-                ['Description', 'description'],
-                ['Personality', 'personality'],
-                ['Scenario', 'scenario'],
-                ['First message', 'first_mes'],
-                ['Example messages', 'mes_example'],
-                ['Creator notes', 'creator_notes'],
-                ['System prompt', 'system_prompt'],
-                ['Post-history instructions', 'post_history_instructions']
-              ].map(([label, field]) => (
+              {coreFields.map(([label, field]) => (
                 <label key={field} className="field">
                   <span>{label}</span>
                   {field === 'name' ? (
@@ -216,7 +218,7 @@ export function CharacterPage() {
           {activeTab === 'tags' ? (
             <div className="stack">
               <label className="field">
-                <span>Tags</span>
+                <span>{t('character.tags.label')}</span>
                 <textarea
                   className="input textarea"
                   value={record.card.data.tags.join(', ')}
@@ -231,7 +233,7 @@ export function CharacterPage() {
                 />
               </label>
               <div className="stack">
-                <p className="muted">Normalized preview</p>
+                <p className="muted">{t('character.tags.normalizedPreview')}</p>
                 <div className="tag-row">
                   {normalizedPreview.map((tag) => (
                     <span key={tag} className="tag-chip">
@@ -246,7 +248,7 @@ export function CharacterPage() {
           {activeTab === 'lorebook' ? (
             <div className="stack">
               <label className="field">
-                <span>Lorebook name</span>
+                <span>{t('character.lorebook.name')}</span>
                 <input
                   className="input"
                   value={record.card.data.character_book?.name ?? ''}
@@ -274,7 +276,7 @@ export function CharacterPage() {
                   })
                 }
               >
-                Add entry
+                {t('character.lorebook.addEntry')}
               </button>
               {record.card.data.character_book?.entries.length ? (
                 <div className="stack">
@@ -283,6 +285,7 @@ export function CharacterPage() {
                       <div className="inline-form">
                         <input
                           className="input"
+                          placeholder={t('character.lorebook.keys')}
                           value={entry.keys.join(', ')}
                           onChange={(event) =>
                             updateLorebookEntry(entry.id, {
@@ -292,6 +295,7 @@ export function CharacterPage() {
                         />
                         <input
                           className="input"
+                          placeholder={t('character.lorebook.secondaryKeys')}
                           value={entry.secondaryKeys.join(', ')}
                           onChange={(event) =>
                             updateLorebookEntry(entry.id, {
@@ -302,6 +306,7 @@ export function CharacterPage() {
                       </div>
                       <textarea
                         className="input textarea"
+                        placeholder={t('character.lorebook.content')}
                         value={entry.content}
                         onChange={(event) => updateLorebookEntry(entry.id, { content: event.target.value })}
                       />
@@ -312,11 +317,12 @@ export function CharacterPage() {
                             checked={entry.enabled}
                             onChange={(event) => updateLorebookEntry(entry.id, { enabled: event.target.checked })}
                           />
-                          <span>Enabled</span>
+                          <span>{t('common.enabled')}</span>
                         </label>
                         <input
                           className="input"
                           type="number"
+                          aria-label={t('character.lorebook.order')}
                           value={entry.order}
                           onChange={(event) => updateLorebookEntry(entry.id, { order: Number(event.target.value) })}
                         />
@@ -333,14 +339,14 @@ export function CharacterPage() {
                             })
                           }
                         >
-                          Delete
+                          {t('character.lorebook.delete')}
                         </button>
                       </div>
                     </article>
                   ))}
                 </div>
               ) : (
-                <EmptyState title="No lorebook entries" description="Create entries and edit keys, secondary keys, content and order." />
+                <EmptyState title={t('character.lorebook.empty.title')} description={t('character.lorebook.empty.description')} />
               )}
             </div>
           ) : null}
@@ -349,25 +355,26 @@ export function CharacterPage() {
             <div className="stack">
               <div className="inline-form">
                 <Link className="button button--ghost" to="/">
-                  Back to library
+                  {t('character.raw.back')}
                 </Link>
               </div>
               <div className="subcard">
-                <h3>Validation</h3>
+                <h3>{t('character.raw.validation')}</h3>
                 {!record.validation.issues.length ? (
-                  <p className="muted">No validation issues.</p>
+                  <p className="muted">{t('character.raw.validationEmpty')}</p>
                 ) : (
                   <ul className="simple-list">
                     {record.validation.issues.map((issue) => (
                       <li key={`${issue.path}-${issue.message}`}>
-                        <strong>{issue.level}</strong> {issue.path}: {issue.message}
+                        <strong>{issue.level}</strong> {issue.path}:{' '}
+                        {issue.messageKey ? t(issue.messageKey as never, issue.messageValues) : issue.message}
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
               <div className="subcard">
-                <h3>Diff</h3>
+                <h3>{t('character.raw.diff')}</h3>
                 <pre className="code-block">
                   {diffLines.map((line, index) => (
                     <div key={`${line.kind}-${index}`} className={`diff-line diff-line--${line.kind}`}>
@@ -378,7 +385,7 @@ export function CharacterPage() {
                 </pre>
               </div>
               <div className="subcard">
-                <h3>Raw JSON</h3>
+                <h3>{t('character.raw.json')}</h3>
                 <pre className="code-block">{serializeCharacterToJson(record)}</pre>
               </div>
             </div>

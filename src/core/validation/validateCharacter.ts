@@ -28,7 +28,8 @@ export function validateCharacter(card: CharacterCardDocument): ValidationSummar
     issues.push({
       level: 'warning',
       path: 'data.description',
-      message: 'Description is empty.'
+      message: 'Description is empty.',
+      messageKey: 'validation.descriptionEmpty'
     });
   }
 
@@ -36,7 +37,8 @@ export function validateCharacter(card: CharacterCardDocument): ValidationSummar
     issues.push({
       level: 'warning',
       path: 'data.first_mes',
-      message: 'First message is empty.'
+      message: 'First message is empty.',
+      messageKey: 'validation.firstMessageEmpty'
     });
   }
 

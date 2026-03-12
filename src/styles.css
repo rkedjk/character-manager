@@ -3,18 +3,58 @@
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  --bg: #f6efe6;
-  --surface: rgba(255, 250, 245, 0.88);
-  --surface-strong: #fffdf9;
-  --surface-muted: #f0e1d2;
-  --border: rgba(70, 44, 29, 0.12);
-  --text: #1f1a16;
-  --text-muted: #6d5c50;
-  --primary: #d86f38;
-  --primary-strong: #b75623;
-  --accent: #315c4d;
-  --danger: #b24040;
-  --shadow: 0 18px 42px rgba(43, 24, 15, 0.1);
+  --bg: #eff1f5;
+  --bg-gradient-top: rgba(30, 102, 245, 0.12);
+  --bg-gradient-right: rgba(223, 142, 29, 0.12);
+  --surface: rgba(255, 255, 255, 0.8);
+  --surface-strong: #ffffff;
+  --surface-muted: #dce0e8;
+  --surface-overlay: rgba(255, 255, 255, 0.72);
+  --surface-inverse: rgba(76, 79, 105, 0.94);
+  --border: rgba(76, 79, 105, 0.14);
+  --text: #4c4f69;
+  --text-muted: #6c6f85;
+  --primary: #1e66f5;
+  --primary-strong: #1146b8;
+  --accent: #179299;
+  --danger: #d20f39;
+  --success-bg: rgba(64, 160, 43, 0.14);
+  --warning-bg: rgba(223, 142, 29, 0.16);
+  --error-bg: rgba(210, 15, 57, 0.14);
+  --tag-bg: rgba(30, 102, 245, 0.12);
+  --tag-text: #1e66f5;
+  --dropzone-bg: rgba(255, 255, 255, 0.45);
+  --code-bg: #303446;
+  --code-text: #c6d0f5;
+  --shadow: 0 18px 42px rgba(76, 79, 105, 0.12);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #1e1e2e;
+  --bg-gradient-top: rgba(137, 180, 250, 0.14);
+  --bg-gradient-right: rgba(249, 226, 175, 0.12);
+  --surface: rgba(49, 50, 68, 0.88);
+  --surface-strong: #313244;
+  --surface-muted: #45475a;
+  --surface-overlay: rgba(49, 50, 68, 0.76);
+  --surface-inverse: rgba(24, 24, 37, 0.96);
+  --border: rgba(205, 214, 244, 0.12);
+  --text: #cdd6f4;
+  --text-muted: #a6adc8;
+  --primary: #89b4fa;
+  --primary-strong: #b4befe;
+  --accent: #94e2d5;
+  --danger: #f38ba8;
+  --success-bg: rgba(166, 227, 161, 0.14);
+  --warning-bg: rgba(249, 226, 175, 0.16);
+  --error-bg: rgba(243, 139, 168, 0.16);
+  --tag-bg: rgba(137, 180, 250, 0.16);
+  --tag-text: #b4befe;
+  --dropzone-bg: rgba(69, 71, 90, 0.48);
+  --code-bg: #11111b;
+  --code-text: #cdd6f4;
+  --shadow: 0 18px 42px rgba(17, 17, 27, 0.3);
 }
 
 * {
@@ -27,9 +67,9 @@ body {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(216, 111, 56, 0.18), transparent 32%),
-    radial-gradient(circle at top right, rgba(49, 92, 77, 0.14), transparent 28%),
-    linear-gradient(180deg, #f8f1e8 0%, var(--bg) 100%);
+    radial-gradient(circle at top left, var(--bg-gradient-top), transparent 32%),
+    radial-gradient(circle at top right, var(--bg-gradient-right), transparent 28%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, white) 0%, var(--bg) 100%);
 }
 
 button,
@@ -61,7 +101,7 @@ a {
   padding: 1rem 1.2rem;
   border: 1px solid var(--border);
   border-radius: 1.5rem;
-  background: rgba(255, 253, 249, 0.85);
+  background: var(--surface-overlay);
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
 }
@@ -197,7 +237,7 @@ p {
   padding: 0.6rem;
   border: 1px solid var(--border);
   border-radius: 1.4rem;
-  background: rgba(31, 26, 22, 0.92);
+  background: var(--surface-inverse);
   box-shadow: var(--shadow);
 }
 
@@ -240,8 +280,8 @@ p {
 .pill {
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
-  background: rgba(216, 111, 56, 0.12);
-  color: var(--primary-strong);
+  background: var(--tag-bg);
+  color: var(--tag-text);
 }
 
 .meta-row {
@@ -263,7 +303,7 @@ p {
   min-height: 11rem;
   border: 1.5px dashed var(--border);
   border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--dropzone-bg);
   text-align: center;
   overflow: hidden;
 }
@@ -291,15 +331,15 @@ p {
 }
 
 .result-item--success {
-  background: rgba(49, 92, 77, 0.12);
+  background: var(--success-bg);
 }
 
 .result-item--warning {
-  background: rgba(216, 111, 56, 0.14);
+  background: var(--warning-bg);
 }
 
 .result-item--error {
-  background: rgba(178, 64, 64, 0.12);
+  background: var(--error-bg);
 }
 
 .field {
@@ -331,8 +371,8 @@ p {
   overflow: auto;
   padding: 1rem;
   border-radius: 1rem;
-  background: #1f1a16;
-  color: #f9f0e5;
+  background: var(--code-bg);
+  color: var(--code-text);
 }
 
 .diff-line--added {

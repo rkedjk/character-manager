@@ -94,6 +94,7 @@ export async function parseCharacterJson(
         fileName: file.name,
         status: record.validation.isValid ? 'success' : 'warning',
         message: record.validation.isValid ? 'JSON imported.' : 'JSON imported with warnings.',
+        messageKey: record.validation.isValid ? 'import.result.jsonSuccess' : 'import.result.jsonWarning',
         characterId: record.id
       }
     };
@@ -102,7 +103,8 @@ export async function parseCharacterJson(
       result: {
         fileName: file.name,
         status: 'error',
-        message: error instanceof Error ? error.message : 'Unknown JSON import error.'
+        message: error instanceof Error ? error.message : 'Unknown JSON import error.',
+        messageKey: error instanceof Error ? undefined : 'import.result.unknownJsonError'
       }
     };
   }
@@ -122,6 +124,7 @@ export async function parseCharacterPng(
         fileName: file.name,
         status: record.validation.isValid ? 'success' : 'warning',
         message: record.validation.isValid ? 'PNG imported.' : 'PNG imported with warnings.',
+        messageKey: record.validation.isValid ? 'import.result.pngSuccess' : 'import.result.pngWarning',
         characterId: record.id
       }
     };
@@ -130,7 +133,8 @@ export async function parseCharacterPng(
       result: {
         fileName: file.name,
         status: 'error',
-        message: error instanceof Error ? error.message : 'Unknown PNG import error.'
+        message: error instanceof Error ? error.message : 'Unknown PNG import error.',
+        messageKey: error instanceof Error ? undefined : 'import.result.unknownPngError'
       }
     };
   }
